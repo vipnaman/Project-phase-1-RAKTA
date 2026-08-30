@@ -1,0 +1,347 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #050a10;
+  --foreground: #f5f7fb;
+  --panel: rgba(16, 22, 30, 0.86);
+  --panel-strong: rgba(20, 26, 35, 0.96);
+  --border: rgba(255, 255, 255, 0.12);
+  --muted: #99a3b4;
+  --primary: #ef4444;
+  --primary-strong: #b91c1c;
+  --gold: #fbbf24;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top, rgba(239, 68, 68, 0.18), transparent 22%),
+    linear-gradient(180deg, #060b12 0%, #0a1018 35%, #050a10 100%);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+  50% { opacity: 0.55; box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); }
+}
+
+@keyframes panel-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ambient-drift-one {
+  0%, 100% { transform: translate3d(-8%, -4%, 0) scale(1); }
+  50% { transform: translate3d(12%, 10%, 0) scale(1.12); }
+}
+
+@keyframes ambient-drift-two {
+  0%, 100% { transform: translate3d(8%, 6%, 0) scale(1.1); }
+  50% { transform: translate3d(-14%, -10%, 0) scale(0.92); }
+}
+
+@keyframes click-burst {
+  0% { opacity: 0.85; transform: translate(-50%, -50%) scale(0.2); }
+  65% { opacity: 0.35; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
+}
+
+@keyframes spark-burst {
+  from { opacity: 0.9; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(1.4) rotate(90deg); }
+}
+
+@keyframes grid-shift {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 54px 54px, 54px 54px; }
+}
+
+@keyframes particle-float {
+  0% { transform: translate3d(0, -12vh, 0) scale(0.8) rotate(0deg); opacity: 0; }
+  15% { opacity: 0.55; }
+  85% { opacity: 0.28; }
+  100% { transform: translate3d(0, 112vh, 0) scale(1) rotate(180deg); opacity: 0; }
+}
+
+@keyframes drop-breathe {
+  0%, 100% { transform: rotate(45deg) scale(1); box-shadow: 0 0 28px rgba(239, 68, 68, 0.35); }
+  50% { transform: rotate(45deg) scale(1.06); box-shadow: 0 0 54px rgba(239, 68, 68, 0.62); }
+}
+
+@keyframes orbit-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes blood-wave {
+  0%, 100% { transform: translateX(-4%); }
+  50% { transform: translateX(4%); }
+}
+
+@keyframes blood-flow {
+  0% { transform: translateY(-10px) scale(0.7); opacity: 0; }
+  20% { opacity: 1; }
+  75% { transform: translateY(24px) scale(1); opacity: 1; }
+  100% { transform: translateY(34px) scale(0.45); opacity: 0; }
+}
+
+.live-effects {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ambient-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background-image: linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 54px 54px;
+  animation: grid-shift 18s linear infinite;
+}
+
+.ambient-glow {
+  position: absolute;
+  width: 38rem;
+  height: 38rem;
+  border-radius: 999px;
+  filter: blur(70px);
+  opacity: 0.2;
+}
+
+.ambient-glow-one {
+  top: -18rem;
+  left: -10rem;
+  background: #ef4444;
+  animation: ambient-drift-one 15s ease-in-out infinite;
+}
+
+.ambient-glow-two {
+  right: -14rem;
+  bottom: -20rem;
+  background: #f59e0b;
+  animation: ambient-drift-two 19s ease-in-out infinite;
+}
+
+.cursor-light {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.2) 0%, rgba(245, 158, 11, 0.08) 34%, transparent 72%);
+  transform: translate(-50%, -50%);
+  transition: left 180ms ease-out, top 180ms ease-out;
+  filter: blur(8px);
+}
+
+.click-ripple {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border: 2px solid rgba(248, 113, 113, 0.9);
+  border-radius: 999px;
+  box-shadow: 0 0 22px rgba(239, 68, 68, 0.6), inset 0 0 16px rgba(251, 191, 36, 0.3);
+  animation: click-burst 700ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards;
+}
+.click-ripple::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fbbf24;
+  box-shadow: 18px 0 #fbbf24, -18px 0 #fbbf24, 0 18px #fbbf24, 0 -18px #fbbf24;
+  animation: spark-burst 600ms ease-out forwards;
+}
+
+.blood-particles { position: absolute; inset: 0; }
+.blood-particle {
+  position: absolute;
+  top: -8vh;
+  width: 7px;
+  height: 9px;
+  border-radius: 60% 40% 55% 45%;
+  background: #ef4444;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.75);
+  animation: particle-float 12s ease-in-out infinite;
+}
+.blood-particle-1 { left: 8%; animation-delay: -2s; }
+.blood-particle-2 { left: 19%; animation-delay: -8s; transform: scale(0.7); }
+.blood-particle-3 { left: 34%; animation-delay: -5s; }
+.blood-particle-4 { left: 47%; animation-delay: -10s; transform: scale(0.6); }
+.blood-particle-5 { left: 61%; animation-delay: -4s; }
+.blood-particle-6 { left: 73%; animation-delay: -7s; transform: scale(0.8); }
+.blood-particle-7 { left: 82%; animation-delay: -1s; }
+.blood-particle-8 { left: 91%; animation-delay: -6s; transform: scale(0.65); }
+.blood-particle-9 { left: 54%; animation-delay: -9s; transform: scale(0.55); }
+
+.blood-drop-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 170px;
+}
+.header-drop-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 132px;
+  padding-top: 8px;
+}
+.blood-bag-logo { position: relative; width: 174px; height: 106px; }
+.blood-bag {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 82px;
+  border: 1px solid rgba(254, 202, 202, 0.8);
+  border-radius: 10px 10px 18px 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(127, 29, 29, 0.9));
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+  overflow: hidden;
+}
+.blood-bag-cap { position: absolute; top: -7px; width: 34px; height: 13px; border-radius: 4px; background: #fca5a5; box-shadow: 0 0 12px rgba(254, 202, 202, 0.6); }
+.blood-bag-fluid { position: absolute; left: -8%; right: -8%; bottom: -20px; height: 58px; border-radius: 50% 50% 0 0; background: #dc2626; opacity: 0.85; animation: blood-wave 3s ease-in-out infinite; }
+.blood-bag strong, .blood-bag small { position: relative; z-index: 1; }
+.blood-bag strong {
+  color: white;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-shadow: 0 1px 8px rgba(69, 10, 10, 0.9);
+}
+.blood-bag small { margin-top: -18px; color: rgba(255,255,255,0.78); font-size: 6px; font-weight: 800; letter-spacing: 0.22em; }
+.blood-bag-tube { position: absolute; z-index: 0; left: 50%; top: -18px; width: 2px; height: 38px; background: rgba(254, 202, 202, 0.75); box-shadow: 0 0 8px rgba(254, 202, 202, 0.5); }
+.blood-bag-drop { position: absolute; z-index: 1; left: calc(50% - 5px); top: 13px; width: 10px; height: 13px; border-radius: 60% 40% 55% 45%; background: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.8); animation: blood-flow 2.2s ease-in infinite; }
+.header-tagline { margin-top: -2px; color: rgba(254, 202, 202, 0.72); font-size: 10px; font-weight: 800; letter-spacing: 0.28em; text-transform: uppercase; }
+.header-drop-mark::before,
+.header-drop-mark::after {
+  content: '';
+  position: absolute;
+  width: 156px;
+  height: 74px;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 50%;
+  transform: rotate(-22deg);
+  animation: orbit-spin 9s linear infinite;
+}
+.header-drop-mark::after { width: 158px; height: 76px; border-color: rgba(245, 158, 11, 0.2); animation-direction: reverse; animation-duration: 13s; }
+.blood-drop {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  border: 1px solid rgba(254, 202, 202, 0.7);
+  border-radius: 50% 50% 50% 0;
+  background: linear-gradient(145deg, #fb7185, #b91c1c 62%, #450a0a);
+  transform: rotate(-45deg);
+  animation: drop-breathe 3.2s ease-in-out infinite;
+}
+.blood-drop span {
+  color: white;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  transform: rotate(45deg);
+}
+.blood-drop-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 154px;
+  height: 92px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+}
+.blood-drop-orbit-one { animation: orbit-spin 9s linear infinite; }
+.blood-drop-orbit-two { width: 190px; height: 112px; border-color: rgba(245, 158, 11, 0.22); transform: translate(-50%, -50%) rotate(45deg); animation: orbit-spin 13s linear infinite reverse; }
+
+body > :not(.live-effects) {
+  position: relative;
+  z-index: 1;
+}
+
+.animate-page { animation: page-enter 650ms ease-out both; }
+.panel { animation: panel-rise 700ms ease-out both; }
+.panel:nth-child(2) { animation-delay: 100ms; }
+.panel:nth-child(3) { animation-delay: 180ms; }
+.back-button {
+  @apply fixed left-4 top-4 z-50 inline-flex min-h-11 min-w-24 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/20 bg-slate-950/90 px-5 py-3 text-sm font-semibold text-slate-200 shadow-lg backdrop-blur-xl transition-[transform,background-color,border-color] duration-100 hover:-translate-x-1 hover:border-red-400/70 hover:bg-red-500/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-400 md:left-8 md:top-6;
+}
+.login-switch { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.35rem; border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: 0.25rem; background: rgba(255,255,255,0.04); }
+.login-tab { min-width: 92px; border-radius: 999px; padding: 0.55rem 1.1rem; color: #99a3b4; font-size: 0.85rem; font-weight: 700; transition: background 120ms ease, color 120ms ease, transform 120ms ease; }
+.login-tab.active { background: rgba(239,68,68,0.18); color: white; }
+.password-field { position: relative; }
+.password-field input { padding-right: 3rem; }
+.password-toggle { position: absolute; right: 0.35rem; top: 50%; display: grid; min-height: 2.5rem; min-width: 2.5rem; place-items: center; transform: translateY(-50%); border-radius: 999px; color: #99a3b4; transition: color 100ms ease, background-color 100ms ease; }
+.password-toggle:hover { color: white; background: rgba(239,68,68,0.16); }
+.login-layout { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 1.25rem; }
+.admin-login-side { align-self: stretch; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button:active, a.btn-primary:active, a.btn-secondary:active { transform: scale(0.97); }
+button:disabled { cursor: wait; opacity: 0.65; }
+.live-dot { animation: live-pulse 1.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page, .panel, .live-dot, .ambient-glow-one, .ambient-glow-two, .ambient-grid, .click-ripple, .blood-particle, .blood-drop, .blood-drop-orbit { animation: none; }
+  .cursor-light { display: none; }
+}
+
+@media print {
+  .live-effects, .back-button, .no-print { display: none !important; }
+  body { background: white; color: black; }
+  .panel { border: 1px solid #ccc; background: white; color: black; box-shadow: none; }
+}
+
+@media (max-width: 640px) {
+  .login-layout { grid-template-columns: 1fr; }
+  .admin-login-side { min-height: auto; }
+}
+
+::selection {
+  background: rgba(239, 68, 68, 0.55);
+  color: white;
+}
+
+@layer components {
+  .container-shell {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .panel {
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.25)];
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-gradient-to-r from-red-600 to-red-500 px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(239,68,68,0.5)] focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-slate-950;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:border-red-400/80 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-400;
+  }
+}
