@@ -28,7 +28,7 @@ RAKTA is a production-ready blood donation platform designed to connect blood se
 
 ## Project status
 
-This project is set up to run as a local working application and is structured for GitHub-based deployment workflows.
+This project is set up as a local demonstration and is structured for GitHub-based deployment workflows. It is not yet suitable for a public production blood-donation service: user, donor, request, and activity data are currently held in memory, and normal-user authentication returns a demo token. A deployment can be used for demonstration and review, but data will reset when the API restarts.
 
 ## Installation
 
@@ -38,7 +38,7 @@ This project is set up to run as a local working application and is structured f
 
 2. Create a production-ready environment file:
 
-   cp .env.example .env
+   Copy `.env.example` to `.env`.
 
 3. Update the values in the file with your real MongoDB, JWT, and domain settings.
 4. Start the project:
@@ -83,13 +83,33 @@ GitHub is used to host the repository, while app deployment is handled by hostin
 - Backend API: Render or Railway
 - Database: MongoDB Atlas
 
-### Typical production setup
+### Quick college-demo link: GitHub Pages
 
-1. Push this repository to GitHub.
-2. Connect the GitHub repo to Vercel for the frontend.
-3. Set environment variables in Vercel for the frontend, especially NEXT_PUBLIC_API_URL.
-4. Deploy the backend to Render/Railway and set its environment variables.
-5. Point the frontend to the live backend URL and configure CORS for the production domain.
+This repository includes a workflow that publishes the frontend to GitHub Pages. Before the first deployment:
+
+1. Deploy the demo API with Render using `render.yaml` and copy its HTTPS URL.
+2. In the GitHub repository, open **Settings → Secrets and variables → Actions → Variables** and add `NEXT_PUBLIC_API_URL` with that URL (for example, `https://rakta-api.onrender.com`). Do not add `/api`.
+3. Open **Settings → Pages**, choose **GitHub Actions** as the source, then push to `main` or run the **Deploy frontend to GitHub Pages** workflow.
+4. GitHub will show the public site URL in the workflow result, usually `https://<github-user>.github.io/Project-phase-1-RAKTA/`.
+
+The Pages link hosts only the frontend. The Render API must remain deployed for forms, registration, login, donor search, and requests to work.
+
+### Deploy the live application
+
+GitHub Pages cannot run this app's Node.js API or MongoDB database. Use GitHub to host the source and deploy the two services as follows.
+
+1. Push the repository to GitHub.
+2. In Render, create a new **Blueprint** from the repository. It will use `render.yaml` to deploy the backend. Add the backend environment variables shown below and copy the resulting API URL, for example `https://rakta-api.onrender.com`.
+3. In Vercel, import the same repository. Set **Root Directory** to `frontend`, then deploy it. Add `NEXT_PUBLIC_API_URL` with the Render API URL; do not add `/api` to the end.
+4. In Render, set `NODE_ENV=production`, `MONGODB_URI`, strong unique `JWT_SECRET`, `JWT_REFRESH_SECRET`, and `ADMIN_PASSWORD` values. Set both `CLIENT_URL` and `FRONTEND_URL` to the final Vercel URL. Optional email, Twilio, and Cloudinary variables may be left unset until those features are configured.
+5. Redeploy the backend after its frontend URLs are set, then redeploy the frontend after `NEXT_PUBLIC_API_URL` is set.
+6. Confirm `https://your-api-domain/api/health` returns a healthy response, then test registration, login, donor search, and blood requests on the Vercel URL.
+
+Vercel automatically detects the Next.js app when `frontend` is selected as its Root Directory. Browser requests go directly to `NEXT_PUBLIC_API_URL`; do not configure a placeholder API rewrite.
+
+### Before opening the service to real users
+
+Do not collect real donor or patient information until the API has been upgraded to store all application records in MongoDB, has real JWT/session authentication and route-level authorization, and has been security-tested. The current in-memory data store and demo login are appropriate only for a portfolio or staging demonstration.
 
 ### CI workflow
 

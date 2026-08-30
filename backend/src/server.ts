@@ -19,6 +19,12 @@ import { appState, seedAppState } from './store.js';
 
 const app = express();
 
+// Render, Railway, and similar hosts terminate TLS before forwarding requests.
+// This keeps IP-based rate limiting accurate behind their reverse proxy.
+if (env.isProduction) {
+  app.set('trust proxy', 1);
+}
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -76,7 +82,14 @@ app.use(
 );
 
 app.get('/api/health', (_req, res) => {
-  res.json(successResponse({ ok: true, service: 'RAKTA API' }, 'API is healthy'));
+  const databaseConnected = mongoose.connection.readyState === mongoose.ConnectionStates.connected;
+  const healthy = !env.isProduction || databaseConnected;
+  res.status(healthy ? 200 : 503).json(
+    successResponse(
+      { ok: healthy, service: 'RAKTA API', database: databaseConnected ? 'connected' : 'disconnected' },
+      healthy ? 'API is healthy' : 'API database is unavailable',
+    ),
+  );
 });
 
 app.use('/api/auth', authRoutes);
@@ -97,6 +110,11 @@ async function startServer() {
     await mongoose.connect(env.mongoUri);
     console.log('MongoDB connected');
   } catch (error) {
+    if (env.isProduction) {
+      console.error('MongoDB connection failed. Refusing to start in production.', error);
+      process.exit(1);
+    }
+
     console.warn('MongoDB unavailable, continuing with in-memory app state for local development.', error);
   }
 

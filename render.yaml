@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: rakta-api
+    runtime: node
+    plan: free
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+    buildCommand: npm ci && npm run build --workspace backend
+    startCommand: npm run start --workspace backend
+    healthCheckPath: /api/health
+    autoDeploy: true
