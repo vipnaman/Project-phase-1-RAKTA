@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { appState } from '../store.js';
 import { errorResponse, successResponse } from '../utils/apiResponse.js';
+import { AuthenticatedRequest, requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/:userId', (req, res) => {
+router.get('/:userId', requireAuth, (req: AuthenticatedRequest, res) => {
+  if (req.user?.id !== req.params.userId && req.user?.role !== 'ADMIN') return res.status(403).json(errorResponse('FORBIDDEN', 'You can only view your own account.'));
   const user = appState.users.find((entry) => entry.id === req.params.userId);
   if (!user) return res.status(404).json(errorResponse('USER_NOT_FOUND', 'Account not found.'));
 

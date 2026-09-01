@@ -24,6 +24,7 @@ export default function LoginPage() {
       if (!response.ok) throw new Error(result?.error?.message || 'Login failed.');
       localStorage.setItem('rakta_user', JSON.stringify(result.data.user));
       localStorage.setItem('rakta_token', result.data.token);
+      if (result.data.refreshToken) localStorage.setItem('rakta_refresh_token', result.data.refreshToken);
       window.location.href = '/dashboard';
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Login failed.'); }
     finally { setLoading(false); }

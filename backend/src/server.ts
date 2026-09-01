@@ -15,7 +15,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import accountRoutes from './routes/accountRoutes.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { successResponse } from './utils/apiResponse.js';
-import { appState, seedAppState } from './store.js';
+import { appState, persistAppState, seedAppState } from './store.js';
 
 const app = express();
 
@@ -69,6 +69,7 @@ app.use('/api', (req, res, next) => {
       createdAt: new Date().toISOString(),
     });
     appState.activities = appState.activities.slice(0, 100);
+    void persistAppState().catch((error) => console.error('Failed to persist activity:', error));
   });
   next();
 });
@@ -104,11 +105,10 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 async function startServer() {
-  await seedAppState();
-
   try {
     await mongoose.connect(env.mongoUri);
     console.log('MongoDB connected');
+    await seedAppState();
   } catch (error) {
     if (env.isProduction) {
       console.error('MongoDB connection failed. Refusing to start in production.', error);
@@ -116,6 +116,7 @@ async function startServer() {
     }
 
     console.warn('MongoDB unavailable, continuing with in-memory app state for local development.', error);
+    await seedAppState();
   }
 
   const startOnPort = (port: number) => {

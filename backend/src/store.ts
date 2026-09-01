@@ -1,4 +1,6 @@
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
+import { AppStateModel } from './models/appStateModel.js';
 
 export type Role = 'USER' | 'DONOR' | 'ADMIN';
 
@@ -104,6 +106,26 @@ export const appState = {
 };
 
 export async function seedAppState() {
+  if (mongoose.connection.readyState === mongoose.ConnectionStates.connected) {
+    const saved = await AppStateModel.findOne({ key: 'primary' }).lean() as {
+      users?: UserRecord[];
+      donors?: DonorRecord[];
+      requests?: RequestRecord[];
+      notifications?: NotificationRecord[];
+      helpResponses?: HelpResponseRecord[];
+      activities?: ActivityRecord[];
+    } | null;
+    if (saved) {
+      appState.users = saved.users || [];
+      appState.donors = saved.donors || [];
+      appState.requests = saved.requests || [];
+      appState.notifications = saved.notifications || [];
+      appState.helpResponses = saved.helpResponses || [];
+      appState.activities = saved.activities || [];
+      return;
+    }
+  }
+
   const adminPassword = await bcrypt.hash('Admin@123', 10);
   const donorPassword = await bcrypt.hash('Donor@123', 10);
 
@@ -225,4 +247,23 @@ export async function seedAppState() {
       createdAt: new Date().toISOString(),
     },
   ];
+
+  await persistAppState();
+}
+
+export async function persistAppState() {
+  if (mongoose.connection.readyState !== mongoose.ConnectionStates.connected) return;
+  await AppStateModel.findOneAndUpdate(
+    { key: 'primary' },
+    {
+      key: 'primary',
+      users: appState.users,
+      donors: appState.donors,
+      requests: appState.requests,
+      notifications: appState.notifications,
+      helpResponses: appState.helpResponses,
+      activities: appState.activities,
+    },
+    { upsert: true, setDefaultsOnInsert: true },
+  ).exec();
 }

@@ -3,11 +3,14 @@ import { appState } from '../store.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
 import { getCompatibleDonorGroups } from '../utils/bloodCompatibility.js';
 import { notifyContact } from '../services/notificationService.js';
+import { AuthenticatedRequest, requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req: AuthenticatedRequest, res) => {
   const { requesterId, requesterEmail, requesterPhone, bloodGroup, unitsRequired, city, state, country, area, hospitalName, hospitalAddress, urgency, requiredDate } = req.body;
+
+  if (req.user?.id !== requesterId) return res.status(403).json(errorResponse('FORBIDDEN', 'You can only create requests for your own account.'));
 
   if (!requesterId || !bloodGroup || !city || !state || !country || !unitsRequired || !urgency) {
     return res.status(400).json(errorResponse('VALIDATION_ERROR', 'Required request information is missing.'));
@@ -74,7 +77,7 @@ router.get('/:id/matches', (req, res) => {
   res.json(successResponse({ requestId: request.requestId, matches }, 'Potential matches found.'));
 });
 
-router.post('/:id/help', (req, res) => {
+router.post('/:id/help', requireAuth, (req: AuthenticatedRequest, res) => {
   const { donorId } = req.body;
   const request = appState.requests.find((entry) => entry.id === req.params.id || entry.requestId === req.params.id);
 
@@ -85,6 +88,9 @@ router.post('/:id/help', (req, res) => {
   if (!donorId) {
     return res.status(400).json(errorResponse('VALIDATION_ERROR', 'donorId is required.'));
   }
+
+  const donor = appState.donors.find((entry) => entry.id === donorId);
+  if (!donor || donor.userId !== req.user?.id) return res.status(403).json(errorResponse('FORBIDDEN', 'Only the matching donor can respond with help.'));
 
   const response: (typeof appState.helpResponses)[number] = {
     id: `help-${Date.now()}`,
