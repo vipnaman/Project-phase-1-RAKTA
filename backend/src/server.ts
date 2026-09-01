@@ -82,6 +82,10 @@ app.use(
   }),
 );
 
+app.get('/', (_req, res) => {
+  res.json(successResponse({ service: 'RAKTA API', health: '/api/health', api: '/api' }, 'RAKTA API is running.'));
+});
+
 app.get('/api/health', (_req, res) => {
   const databaseConnected = mongoose.connection.readyState === mongoose.ConnectionStates.connected;
   const healthy = !env.isProduction || databaseConnected;
