@@ -111,7 +111,10 @@ async function startServer() {
     await seedAppState();
   } catch (error) {
     if (env.isProduction) {
-      console.error('MongoDB connection failed. Refusing to start in production.', error);
+      const databaseError = error instanceof Error ? error : new Error(String(error));
+      console.error('MongoDB connection failed. Refusing to start in production.');
+      console.error(`Database error: ${databaseError.name}: ${databaseError.message}`);
+      console.error('Check MONGODB_URI, Atlas Network Access, database user permissions, and that the cluster is running.');
       process.exit(1);
     }
 
