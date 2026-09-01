@@ -22,7 +22,7 @@ services:
         sync: false
       - key: SERVER_URL
         sync: false
-    buildCommand: npm ci && npm run build --workspace backend
+    buildCommand: npm ci --include=dev && npm run build --workspace backend
     startCommand: npm run start --workspace backend
     healthCheckPath: /api/health
     autoDeploy: true
